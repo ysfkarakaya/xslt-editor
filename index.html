@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XSLT Düzenleyici Pro</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts - Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- AOS - Animate On Scroll -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/theme/dracula.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/addon/dialog/dialog.min.css">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+            --transition-speed: 0.3s;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .app-title {
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-title i {
+            margin-right: 15px;
+            font-size: 1.8rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            font-weight: 600;
+            padding: 15px 20px;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .nav-tabs {
+            border-bottom: none;
+            margin-bottom: 15px;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            margin-right: 10px;
+            font-weight: 500;
+            color: #555;
+            transition: all var(--transition-speed);
+        }
+        
+        .nav-tabs .nav-link:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        
+        .nav-tabs .nav-link i {
+            margin-right: 8px;
+        }
+        
+        .btn {
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all var(--transition-speed);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            border-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            transition: all var(--transition-speed);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+        
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        .CodeMirror {
+            border-radius: 8px;
+            height: 500px;
+            font-family: 'Fira Code', monospace;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        #previewFrame {
+            min-height: 600px;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            background-color: white;
+        }
+        
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .modal-content {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            padding: 15px 20px;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+        }
+        
+        .modal-footer {
+            border-top: none;
+            padding: 15px 20px;
+        }
+        
+        .image-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(67, 97, 238, 0.2);
+            border: 2px dashed var(--primary-color);
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            z-index: 1000;
+            color: white;
+            font-size: 1.5em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+        }
+        
+        .image-container:hover .image-overlay {
+            opacity: 1;
+            background-color: rgba(67, 97, 238, 0.4);
+        }
+        
+        .table-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        .table-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(67, 97, 238, 0.2);
+            border: 2px dashed var(--primary-color);
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            z-index: 1000;
+            color: white;
+            font-size: 1.5em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+        }
+        
+        .table-container:hover .table-overlay {
+            opacity: 1;
+            background-color: rgba(67, 97, 238, 0.4);
+        }
+        
+        /* File Drop Area */
+        .file-drop-area {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 100%;
+            padding: 25px;
+            border: 2px dashed var(--primary-color);
+            border-radius: 8px;
+            transition: 0.2s;
+            background-color: rgba(67, 97, 238, 0.05);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .file-drop-area.is-active {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+        
+        .file-msg {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #777;
+            transition: 0.2s;
+            width: 100%;
+        }
+        
+        .file-drop-area .form-control {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 100%;
+            cursor: pointer;
+            opacity: 0;
+        }
+        
+        /* Dark Mode */
+        body.dark-mode {
+            background-color: #1a1a2e;
+            color: #f0f0f0;
+        }
+        
+        body.dark-mode .card {
+            background-color: #16213e;
+            color: #f0f0f0;
+        }
+        
+        body.dark-mode .card-header.bg-white {
+            background-color: #0f3460 !important;
+            color: #f0f0f0;
+        }
+        
+        body.dark-mode .nav-tabs .nav-link {
+            color: #f0f0f0;
+        }
+        
+        body.dark-mode .nav-tabs .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-mode .form-control, 
+        body.dark-mode .form-select {
+            background-color: #16213e;
+            border-color: #0f3460;
+            color: #f0f0f0;
+        }
+        
+        body.dark-mode .form-label {
+            color: #f0f0f0;
+        }
+        
+        body.dark-mode .file-drop-area {
+            border-color: #0f3460;
+            background-color: rgba(15, 52, 96, 0.2);
+        }
+        
+        body.dark-mode .file-msg {
+            color: #f0f0f0;
+        }
+        
+        body.dark-mode .CodeMirror {
+            border-color: #0f3460;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .app-header {
+                padding: 15px;
+            }
+            
+            .app-title {
+                font-size: 1.5rem;
+            }
+            
+            .nav-tabs .nav-link {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .form-control, .form-select {
+                padding: 10px;
+            }
+            
+            .CodeMirror {
+                height: 400px;
+            }
+            
+            #previewFrame {
+                min-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header" data-aos="fade-down">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="app-title"><i class="fas fa-code"></i> XSLT Düzenleyici Pro</h1>
+                <div class="app-controls">
+                    <button id="themeToggle" class="btn btn-sm btn-outline-light" title="Tema Değiştir">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="dropdown d-inline-block ms-2">
+                        <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="helpDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Yardım">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="helpDropdown">
+                            <li><h6 class="dropdown-header">Kısayol Tuşları</h6></li>
+                            <li><a class="dropdown-item" href="#"><kbd>Ctrl</kbd> + <kbd>F</kbd> Ara</a></li>
+                            <li><a class="dropdown-item" href="#"><kbd>Ctrl</kbd> + <kbd>G</kbd> Sonraki</a></li>
+                            <li><a class="dropdown-item" href="#"><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>F</kbd> Değiştir</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-info-circle"></i> Hakkında</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card" data-aos="fade-up">
+                    <div class="card-header bg-white">
+                        <i class="fas fa-file-upload me-2"></i> XSLT Dosyası
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs" id="xsltTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="upload-new-tab" data-bs-toggle="tab" data-bs-target="#upload-new" type="button" role="tab" aria-controls="upload-new" aria-selected="true">
+                                    <i class="fas fa-upload"></i> Yükle
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="select-default-tab" data-bs-toggle="tab" data-bs-target="#select-default" type="button" role="tab" aria-controls="select-default" aria-selected="false">
+                                    <i class="fas fa-list"></i> Varsayılanlardan Seç
+                                </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="xsltTabContent">
+                            <div class="tab-pane fade show active" id="upload-new" role="tabpanel" aria-labelledby="upload-new-tab">
+                                <div class="mt-3">
+                                    <div class="mb-3">
+                                        <label for="xsltFile" class="form-label">XSLT Dosyası Seçin:</label>
+                                        <div class="file-drop-area">
+                                            <span class="file-msg">Dosyayı buraya sürükleyin veya seçin</span>
+                                            <input class="form-control" type="file" id="xsltFile" accept=".xslt, .xsl">
+                                        </div>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button id="uploadButton" class="btn btn-success">
+                                            <i class="fas fa-upload"></i> Yükle
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="select-default" role="tabpanel" aria-labelledby="select-default-tab">
+                                <div class="mt-3">
+                                    <div class="mb-3">
+                                        <label for="xsltSelect" class="form-label">Varsayılan XSLT Seçin:</label>
+                                        <select class="form-select" id="xsltSelect">
+                                            <option value="default/arsiv_default.xslt">Arşiv (Varsayılan)</option>
+                                            <option value="default/fatura_default.xslt">Fatura (Varsayılan)</option>
+                                            <option value="default/irsaliye_default.xslt">İrsaliye (Varsayılan)</option>
+                                        </select>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button id="loadDefaultButton" class="btn btn-primary">
+                                            <i class="fas fa-check-circle"></i> Seçili Dosyayı Yükle
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist" style="display:none">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="code-tab" data-bs-toggle="tab" data-bs-target="#code" type="button" role="tab" aria-controls="code" aria-selected="true">
+                    <i class="fas fa-code"></i> Kod
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="preview-tab" data-bs-toggle="tab" data-bs-target="#preview" type="button" role="tab" aria-controls="preview" aria-selected="false">
+                    <i class="fas fa-eye"></i> Önizleme
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent" style="display:none;">
+            <div class="tab-pane fade" id="code" role="tabpanel" aria-labelledby="code-tab">
+                <div class="card" data-aos="fade-up">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-code me-2"></i> XSLT Kodunu Düzenleyin</span>
+                        <div class="editor-actions">
+                            <button id="updateButton" class="btn btn-warning">
+                                <i class="fas fa-sync-alt"></i> Güncelle
+                            </button>
+                            <button id="downloadButton" class="btn btn-primary">
+                                <i class="fas fa-download"></i> Dışa Aktar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <textarea id="xsltEditor" style="display:none;"></textarea>
+                        <div id="codeEditor"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="preview" role="tabpanel" aria-labelledby="preview-tab">
+                <div class="card" data-aos="fade-up">
+                    <div class="card-header bg-white">
+                        <i class="fas fa-eye me-2"></i> Önizleme
+                    </div>
+                    <div class="card-body p-0">
+                        <iframe id="previewFrame" width="100%" height="600px"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resim Değiştirme Modalı -->
+        <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="imageModalLabel"><i class="fas fa-image me-2"></i> Resmi Değiştir</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="newImage" class="form-label">Yeni Resim Seçin:</label>
+                            <input class="form-control" type="file" id="newImage" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Kapat
+                        </button>
+                        <button type="button" class="btn btn-primary" id="uploadNewImage">
+                            <i class="fas fa-upload"></i> Yükle
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tablo Düzenleme Modalı -->
+        <div class="modal fade" id="tableModal" tabindex="-1" aria-labelledby="tableModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="tableModalLabel"><i class="fas fa-table me-2"></i> Tabloyu Düzenle</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="tableEditorContainer">
+                            <!-- Tablo içeriği burada dinamik olarak oluşturulacak -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" id="addNewRow">
+                            <i class="fas fa-plus"></i> Yeni Satır Ekle
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Kapat
+                        </button>
+                        <button type="button" class="btn btn-primary" id="saveTableChanges">
+                            <i class="fas fa-save"></i> Kaydet
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS - Animate On Scroll -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/addon/search/search.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/addon/search/searchcursor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/addon/search/jump-to-line.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/addon/dialog/dialog.min.js"></script>
+    
+    <!-- Modüler JavaScript dosyaları -->
+    <script src="utils.js"></script>
+    <script src="transformAndPreview.js"></script>
+    <script src="tableEditing.js"></script>
+    <script src="imageHandling.js"></script>
+    <script src="main.js"></script>
+    
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+    </script>
+</body>
+</html>
